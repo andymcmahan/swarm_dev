@@ -47,9 +47,15 @@ vm_consul() {
   sleep 3
 }
 
+vm_manage() {
+    echo -e "\n"
+      docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
+      sleep 3
+}
+
 vm_create() {
   echo -e "\n"
-  docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
+  docker-machine create -d virtualbox --virtualbox-memory "8192" --virtualbox-cpu-count "2" --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
   sleep 3
 }
 
@@ -95,7 +101,7 @@ next && echo -e "\n"
 step "Start swarm-master vm"
   host="swarm-master"
   try vm_exists
-  try vm_create
+  try vm_manage
 next && echo -e "\n"
 
 step "Start swarm container"
@@ -126,3 +132,4 @@ echo -e "\033[93mINFO: consul - tcp://$(docker-machine ip consul):2375\033[0m"
 echo -e "\033[93mINFO: swarm-master - tcp://$(docker-machine ip swarm-master):2375\033[0m" 
 echo -e "\033[93mINFO: node0 - tcp://$(docker-machine ip node0):2375\033[0m" 
 echo -e "\033[93mINFO: node1 - tcp://$(docker-machine ip node1):2375\033[0m"
+
