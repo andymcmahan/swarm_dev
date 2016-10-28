@@ -1,5 +1,6 @@
 #!/bin/bash
 clear
+echo $(pwd)
 DOCKER_MACHINE_VERSION="0.8.2"
 . functions
 . try_step_next
@@ -55,7 +56,7 @@ vm_manage() {
 
 vm_create() {
   echo -e "\n"
-  docker-machine create -d virtualbox --virtualbox-memory "8192" --virtualbox-cpu-count "2" --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
+  docker-machine create -d virtualbox --virtualbox-memory "4096" --virtualbox-cpu-count "2" --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
   sleep 3
 }
 
@@ -78,6 +79,11 @@ docker_join() {
   sleep 3
 }
 
+docker_portainer() {
+    echo -e "\n" && switch_to_host
+    docker run -d -p 9000:9000 portainer/portainer -H tcp://$(docker-machine ip swarm-master):4243 
+    sleep 3
+}
 
 ### STEPS ###
 step "Check for Docker"
@@ -118,18 +124,18 @@ step "Join swarm node0"
   try docker_join
 next && echo -e "\n"
 
-step "Start swarm node1 vm"
-  host="node1"
-  try vm_exists
-  try vm_create
-next && echo -e "\n"
+# step "Start swarm node1 vm"
+#   host="node1"
+#   try vm_exists
+#   try vm_create
+# next && echo -e "\n"
 
-step "Join swarm node1"
-  try docker_join
-next && echo -e "\n"
+# step "Join swarm node1"
+#   try docker_join
+# next && echo -e "\n"
 
 echo -e "\033[93mINFO: consul - tcp://$(docker-machine ip consul):2375\033[0m" 
 echo -e "\033[93mINFO: swarm-master - tcp://$(docker-machine ip swarm-master):2375\033[0m" 
 echo -e "\033[93mINFO: node0 - tcp://$(docker-machine ip node0):2375\033[0m" 
-echo -e "\033[93mINFO: node1 - tcp://$(docker-machine ip node1):2375\033[0m"
+#echo -e "\033[93mINFO: node1 - tcp://$(docker-machine ip node1):2375\033[0m"
 
