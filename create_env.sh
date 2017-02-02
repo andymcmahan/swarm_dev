@@ -1,7 +1,7 @@
 #!/bin/bash
 clear
 echo $(pwd)
-DOCKER_MACHINE_VERSION="0.8.2"
+DOCKER_MACHINE_VERSION="0.9.0"
 . functions
 . try_step_next
 
@@ -56,13 +56,15 @@ vm_manage() {
 
 vm_create() {
   echo -e "\n"
-  docker-machine create -d virtualbox --virtualbox-memory "4096" --virtualbox-cpu-count "2" --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
+  docker-machine create -d virtualbox --virtualbox-memory "2048" --virtualbox-cpu-count "1" --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
   sleep 3
 }
 
 docker_consul() {
   echo -e "\n" && switch_to_host
-  docker run -d -p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 53:53/udp progrium/consul "-server -bootstrap -advertise $(/usr/local/bin/docker-machine ip consul)" 
+  sed -i.bak s/ipaddress/$(/usr/local/bin/docker-machine ip consul)/g consul-compose.yml   
+  docker-compose -f consul-compose.yml up -d 
+  cp -f consul-compose.yml.bak consul-compose.yml && mv consul-compose.yml.bak consul-compose.previous
   sleep 3
 }
 
@@ -124,18 +126,18 @@ step "Join swarm node0"
   try docker_join
 next && echo -e "\n"
 
-# step "Start swarm node1 vm"
-#   host="node1"
-#   try vm_exists
-#   try vm_create
-# next && echo -e "\n"
+step "Start swarm node1 vm"
+  host="node1"
+  try vm_exists
+  try vm_create
+next && echo -e "\n"
 
-# step "Join swarm node1"
-#   try docker_join
-# next && echo -e "\n"
+step "Join swarm node1"
+  try docker_join
+next && echo -e "\n"
 
 echo -e "\033[93mINFO: consul - tcp://$(docker-machine ip consul):2375\033[0m" 
 echo -e "\033[93mINFO: swarm-master - tcp://$(docker-machine ip swarm-master):2375\033[0m" 
 echo -e "\033[93mINFO: node0 - tcp://$(docker-machine ip node0):2375\033[0m" 
-#echo -e "\033[93mINFO: node1 - tcp://$(docker-machine ip node1):2375\033[0m"
+echo -e "\033[93mINFO: node1 - tcp://$(docker-machine ip node1):2375\033[0m"
 
