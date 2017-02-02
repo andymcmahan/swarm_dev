@@ -1,6 +1,7 @@
 #!/bin/bash
 clear
-DOCKER_MACHINE_VERSION="0.8.2"
+echo $(pwd)
+DOCKER_MACHINE_VERSION="0.9.0"
 . functions
 . try_step_next
 
@@ -55,13 +56,15 @@ vm_manage() {
 
 vm_create() {
   echo -e "\n"
-  docker-machine create -d virtualbox --virtualbox-memory "8192" --virtualbox-cpu-count "2" --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
+  docker-machine create -d virtualbox --virtualbox-memory "2048" --virtualbox-cpu-count "1" --engine-env DOCKER_TLS=no --engine-opt host=tcp://0.0.0.0:2375 --engine-opt="cluster-store=consul://$(/usr/local/bin/docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth0:2375" --engine-label="host=${host}" "${host}" || true
   sleep 3
 }
 
 docker_consul() {
   echo -e "\n" && switch_to_host
-  docker run -d -p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 53:53/udp progrium/consul "-server -bootstrap -advertise $(/usr/local/bin/docker-machine ip consul)" 
+  sed -i.bak s/ipaddress/$(/usr/local/bin/docker-machine ip consul)/g consul-compose.yml   
+  docker-compose -f consul-compose.yml up -d 
+  cp -f consul-compose.yml.bak consul-compose.yml && mv consul-compose.yml.bak consul-compose.previous
   sleep 3
 }
 
@@ -78,6 +81,11 @@ docker_join() {
   sleep 3
 }
 
+docker_portainer() {
+    echo -e "\n" && switch_to_host
+    docker run -d -p 9000:9000 portainer/portainer -H tcp://$(docker-machine ip swarm-master):4243 
+    sleep 3
+}
 
 ### STEPS ###
 step "Check for Docker"
