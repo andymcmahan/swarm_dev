@@ -14,6 +14,7 @@ import re
 
 docker_machine_version = '0.9.0'
 #boot2iso_url = 'https://github.com/boot2docker/boot2docker/releases/download/v1.13.1-rc1/boot2docker.iso'
+#experimental_boot2docker_url=https://hub.docker.com/r/ahbeng/boot2docker-experimental/
 #Use local to make it faster
 boot2iso_url= './boot2docker.iso'
 system,node,release,version,machine = os.uname()
@@ -31,7 +32,7 @@ def install_docker_machine():
     versioncommand = subprocess.Popen(['/usr/local/bin/docker-machine', 'version'], stdout=subprocess.PIPE)
     version = versioncommand.stdout.read().split()
     if not version[0] == 'docker-machine':
-        print "ERROR: docker-machine not installed, install the docker-engine package first then rerun this script"
+        print "ERROR: docker-machine not installed, install the docker-toolbox package first then rerun this script.\nhttps://github.com/docker/toolbox/releases"
         sys.exit(0)
     if not version[2].replace(",","") == docker_machine_version:
         print "WARNING: Found old version installing docker-machine v" + docker_machine_version
@@ -62,7 +63,7 @@ def delete_old():
 
 def create_vm(name):
     print "Creating virtual machine " + name
-    createcommand = subprocess.Popen(['docker-machine', 'create', '-d', 'virtualbox', '--virtualbox-boot2docker-url', boot2iso_url ,'--engine-env', 'DOCKER_TLS=no', '--engine-opt', 'host=tcp://0.0.0.0:4243', name], stdout=subprocess.PIPE)
+    createcommand = subprocess.Popen(['docker-machine', 'create', '-d', 'virtualbox', '--virtualbox-boot2docker-url', boot2iso_url ,'--engine-env', 'DOCKER_TLS=no', '--engine-opt', 'host=tcp://0.0.0.0:4243', '--engine-opt', 'experimental=true', name], stdout=subprocess.PIPE)
     print createcommand.stdout.read()
 
 
@@ -116,11 +117,13 @@ delete_old()
 create_vm("manager")
 create_vm("node1")
 create_vm("node2")
+create_vm("node3")
 
 # Start Swarm
 token = start_swarm(get_ip("manager"))
 join_swarm(get_ip("node1"), token)
 join_swarm(get_ip("node2"), token)
+join_swarm(get_ip("node3"), token)
 
 #ls Swarm
 ls_swarm(get_ip("manager"))
