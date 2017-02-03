@@ -48,6 +48,14 @@ Endpoint Mode:	vip
 ```
 Without _--pretty_ you get a full information
 
+**Show which nodes are running a service**
+```bash
+% docker service ps EXAMPLE_STACK_1_service1
+ID            NAME                        IMAGE           NODE   DESIRED STATE  CURRENT STATE               ERROR  PORTS
+q3rw0t89onxn  EXAMPLE_STACK_1_service1.1  busybox:latest  node3  Running        Running about a minute ago 
+
+```
+
 **Remove a service**
 ```bash
 % docker service rm Test1_service1
