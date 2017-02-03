@@ -12,6 +12,11 @@ import os
 import time
 import re
 
+vm_mem = '1024'
+#vm_mem = '8192'
+vm_cpu = '1'
+#vm_cpu = '2'
+
 docker_machine_version = '0.9.0'
 #boot2iso_url = 'https://github.com/boot2docker/boot2docker/releases/download/v1.13.1-rc1/boot2docker.iso'
 #experimental_boot2docker_url=https://hub.docker.com/r/ahbeng/boot2docker-experimental/
@@ -63,7 +68,7 @@ def delete_old():
 
 def create_vm(name):
     print "Creating virtual machine " + name
-    createcommand = subprocess.Popen(['docker-machine', 'create', '-d', 'virtualbox', '--virtualbox-boot2docker-url', boot2iso_url ,'--engine-env', 'DOCKER_TLS=no', '--engine-opt', 'host=tcp://0.0.0.0:4243', '--engine-opt', 'experimental=true', name], stdout=subprocess.PIPE)
+    createcommand = subprocess.Popen(['docker-machine', 'create', '-d', 'virtualbox', '--virtualbox-boot2docker-url' , boot2iso_url, '--virtualbox-memory', vm_mem, '--virtualbox-cpu-count', vm_cpu, '--engine-env', 'DOCKER_TLS=no', '--engine-opt', 'host=tcp://0.0.0.0:4243', '--engine-opt', 'experimental=true', name], stdout=subprocess.PIPE)
     print createcommand.stdout.read()
 
 
