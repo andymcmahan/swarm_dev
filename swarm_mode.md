@@ -1,6 +1,7 @@
 # Swarm-Mode
+
 ### New Concepts
----
+
 ##### Swarm
 * A swarm is a cluster of one or more **workers** and **manager** **nodes** attached together using the cluster management features embedded in docker-engine.
     * A manager node dispatches service **tasks** to the nodes participating in the cluster. For reliability there can be many manager nodes in a swarm cluster, a single manager is elected as the swarm leader.
@@ -26,7 +27,8 @@
  
 [load_balance]: http://docs.docker.com.s3-website-us-east-1.amazonaws.com/engine/swarm/images/ingress-routing-mesh.png "ingress"
  
----
-* **[Nodes](nodes.md)**
-* **[Stacks](stacks.md)**
-* **[Services](services.md)**
+ 
+#### [Nodes](nodes.md)
+#### [Stacks](stacks.md)
+#### [Services](services.md)
+#### [Compose_V3](compose.md)
